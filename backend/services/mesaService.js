@@ -27,7 +27,7 @@ const {
 } = require('../utils/validators');
 const { obtenerTurnos } = require('../config/horarios');
 
-const UMBICACIONES = ['interior', 'terraza', 'ventana', 'barra', 'privada'];
+const UBICACIONES = ['interior', 'terraza', 'ventana', 'barra', 'privada'];
 const ESTADOS = ['disponible', 'mantenimiento'];
 
 const CAMPOS_MESA = 'id, numero, capacidad, ubicacion, estado, created_at';
@@ -128,7 +128,7 @@ async function crear({ numero, capacidad, ubicacion, estado }) {
 async function actualizar(id, cuerpo) {
   const mesaId = validarId(id, 'id');
 
-  const existente = await db.admin.from('mesas').select('id').eq('id', mesaId).maybeSingle();
+  const existente = await db.ejecutar(() => db.admin.from('mesas').select('id').eq('id', mesaId).maybeSingle());
   if (!existente) throw HttpError.noEncontrado('La mesa solicitada no existe.');
 
   const campos = Object.keys(cuerpo).filter((clave) => cuerpo[clave] !== undefined);
@@ -153,7 +153,7 @@ async function actualizar(id, cuerpo) {
 async function eliminar(id) {
   const mesaId = validarId(id, 'id');
 
-  const mesa = await db.admin.from('mesas').select('id, numero').eq('id', mesaId).maybeSingle();
+  const mesa = await db.ejecutar(() => db.admin.from('mesas').select('id, numero').eq('id', mesaId).maybeSingle());
   if (!mesa) throw HttpError.noEncontrado('La mesa solicitada no existe.');
 
   const pendientes = await db.ejecutar(() =>
@@ -247,7 +247,7 @@ function normalizarHora(hora) {
 }
 
 module.exports = {
-  UMBICACIONES,
+  UBICACIONES,
   ESTADOS,
   listar,
   obtenerPorId,

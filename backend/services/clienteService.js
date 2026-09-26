@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Servicio de clientes.
  *
  * Los clientes pueden registrarse como invitados (sin cuenta) o bien tener una
@@ -20,7 +20,7 @@ const { normalizarReserva } = require('./reservaService');
 
 const CAMPOS = 'id, usuario_id, nombre, apellido, email, telefono, created_at';
 
-/** Lista clientes con bÃºsqueda, orden y paginaciÃ³n. */
+/** Lista clientes con busqueda, orden y paginacion. */
 async function listar({ busqueda, limite = 50, pagina = 1, orden = 'reciente' } = {}) {
   const limiteNum = validarEntero(limite ?? 50, 'limite', { min: 1, max: 500 });
   const paginaNum = validarEntero(pagina ?? 1, 'pagina', { min: 1, max: 10_000 });
@@ -75,19 +75,18 @@ async function obtenerPorId(id) {
 async function listarReservas(id) {
   const clienteId = validarId(id, 'id');
 
-  const existe = await db.admin.from('clientes').select('id').eq('id', clienteId).maybeSingle();
+  const existe = await db.ejecutar(() => db.admin.from('clientes').select('id').eq('id', clienteId).maybeSingle());
   if (!existe) throw HttpError.noEncontrado('El cliente solicitado no existe.');
 
+  // Columnas planas de la vista v_reservas (mismo criterio que reservaService).
   const reservas = await db.ejecutar(() =>
     db.admin
       .from('v_reservas')
-      .select(
-        `id, codigo, cliente_id, mesa_id, fecha, hora, personas, estado, observaciones, created_at,
-         c.nombre AS cliente_nombre, c.apellido AS cliente_apellido,
-         c.email AS cliente_email, c.telefono AS cliente_telefono,
-         m.numero AS mesa_numero, m.capacidad AS mesa_capacidad,
-         m.ubicacion AS mesa_ubicacion, m.estado AS mesa_estado`
-      )
+      .select(`
+        id, codigo, cliente_id, mesa_id, fecha, hora, personas, estado, observaciones, created_at,
+        cliente_nombre, cliente_apellido, cliente_email, cliente_telefono,
+        mesa_numero, mesa_capacidad, mesa_ubicacion, mesa_estado
+      `)
       .eq('cliente_id', clienteId)
       .order('fecha', { ascending: false })
       .order('hora', { ascending: false })
@@ -114,7 +113,7 @@ async function crear({ nombre, apellido, email, telefono, usuarioId }) {
 async function actualizar(id, cuerpo) {
   const clienteId = validarId(id, 'id');
 
-  const existente = await db.admin.from('clientes').select('id, usuario_id').eq('id', clienteId).maybeSingle();
+  const existente = await db.ejecutar(() => db.admin.from('clientes').select('id, usuario_id').eq('id', clienteId).maybeSingle());
   if (!existe) throw HttpError.noEncontrado('El cliente solicitado no existe.');
 
   const datos = {};
@@ -126,14 +125,14 @@ async function actualizar(id, cuerpo) {
   if (cuerpo.telefono !== undefined) datos.telefono = validarTelefono(cuerpo.telefono);
 
   if (Object.keys(datos).length === 0) {
-    throw HttpError.badRequest('No se enviÃ³ ningÃºn campo para actualizar.');
+    throw HttpError.badRequest('No se envio ningun campo para actualizar.');
   }
 
   const cliente = await db.ejecutar(() =>
     db.admin.from('clientes').update(datos).eq('id', clienteId).select(CAMPOS).single()
   );
 
-  // Si el email cambiÃ³, la cuenta de acceso debe seguir siendo coherente.
+// Si el email cambio, la cuenta de acceso debe seguir siendo coherente.
   if (datos.email && existente.usuario_id) {
     await db.admin.from('usuarios').update({ email: datos.email }).eq('id', existente.usuario_id);
     try {
@@ -150,7 +149,7 @@ async function actualizar(id, cuerpo) {
 async function eliminar(id) {
   const clienteId = validarId(id, 'id');
 
-  const cliente = await db.admin.from('clientes').select('id, nombre').eq('id', clienteId).maybeSingle();
+  const cliente = await db.ejecutar(() => db.admin.from('clientes').select('id, nombre').eq('id', clienteId).maybeSingle());
   if (!cliente) throw HttpError.noEncontrado('El cliente solicitado no existe.');
 
   const [reservas, pedidos] = await Promise.all([

@@ -6,6 +6,7 @@
 const authService = require('../services/authService');
 const asyncHandler = require('../utils/asyncHandler');
 const { ok, creado } = require('../utils/respuestas');
+const { perfilDesdeToken } = require('../services/authService');
 const { validarTexto, validarTelefono } = require('../utils/validators');
 
 /** POST /api/auth/register */

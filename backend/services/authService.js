@@ -30,6 +30,13 @@ const PERFIL_SELECT = 'id, nombre, email, rol, created_at';
 /**
  * Registra un nuevo usuario. Siempre con rol 'cliente': nadie puede auto-asignarse
  * el rol de administrador.
+ *
+ * ORDEN DE LAS OPERACIONES (importante)
+ * El perfil en `public.usuarios` se crea ANTES de iniciar sesión, porque
+ * `iniciarSesion` lo busca para resolver el rol. Si se invirtiera el orden y el
+ * proyecto de Supabase exigiera confirmar el email (no devolvería `session`),
+ * el login fallaría con "Tu cuenta no está activa en la aplicación" y el
+ * registro se rompería siempre.
  */
 async function registrar({ nombre, email, password, telefono }) {
   const nombreLimpio = validarTexto(nombre, 'nombre', { min: 2, max: 80 });
@@ -49,11 +56,10 @@ async function registrar({ nombre, email, password, telefono }) {
     throw HttpError.badRequest('No se pudo crear la cuenta. Intentá de nuevo.');
   }
 
-  // Si el proyecto de Supabase tiene la confirmación de email activa, no se
-  // devuelve sesión. En un entorno de desarrollo eso bloquea el primer acceso,
-  // así que se confirma la cuenta y se inicia sesión automáticamente.
-  let sesion = signup.session;
-  if (!sesion) {
+  // 1. Si el proyecto exige confirmar el email no viene sesión: se confirma la
+  //    cuenta para no bloquear el primer acceso en un entorno sin servidor de
+  //    correo.
+  if (!signup.session) {
     const { error: errorConfirmar } = await db.admin.auth.admin.updateUserById(authUser.id, {
       email_confirm: true,
     });
@@ -62,11 +68,10 @@ async function registrar({ nombre, email, password, telefono }) {
         'Cuenta creada. Revisá tu correo para confirmar el acceso antes de iniciar sesión.'
       );
     }
-    sesion = await iniciarSesion(emailLimpio, contrasena);
   }
 
-  const cliente = await crearOVincularCliente({ nombre: nombreLimpio, email: emailLimpio, telefono, usuarioId: authUser.id });
-
+  // 2. Perfil de aplicación. Va antes que la sesión porque `iniciarSesion`
+  //    resuelve el rol desde esta tabla.
   const perfil = await db.ejecutar(() =>
     db.admin
       .from('usuarios')
@@ -74,6 +79,17 @@ async function registrar({ nombre, email, password, telefono }) {
       .select(PERFIL_SELECT)
       .single()
   );
+
+  // 3. Ficha de cliente (el usuario_id ya existe, así que la FK se respeta).
+  const cliente = await crearOVincularCliente({
+    nombre: nombreLimpio,
+    email: emailLimpio,
+    telefono,
+    usuarioId: authUser.id,
+  });
+
+  // 4. Sesión.
+  const sesion = signup.session ?? (await iniciarSesion(emailLimpio, contrasena));
 
   return construirSesion(perfil, sesion, cliente?.id ?? null);
 }
@@ -125,12 +141,19 @@ async function perfilDesdeToken(token) {
     throw HttpError.prohibido('Tu cuenta no está activa en la aplicación.');
   }
 
+  // El id del cliente vive en `clientes.usuario_id`, NO en `usuarios`:
+  // la tabla usuarios no tiene columna cliente_id, así que leerla acá
+  // devolvía siempre null y el usuario quedaba sin ficha de cliente.
+  const cliente = await db.ejecutar(() =>
+    db.admin.from('clientes').select('id').eq('usuario_id', perfil.id).maybeSingle()
+  );
+
   return {
     id: perfil.id,
     nombre: perfil.nombre,
     email: perfil.email,
     rol: perfil.rol,
-    clienteId: perfil.cliente_id ?? null,
+    clienteId: cliente?.id ?? null,
     createdAt: perfil.created_at,
   };
 }
@@ -214,21 +237,23 @@ async function crearOVincularCliente({ nombre, email, telefono, usuarioId }) {
     if (existente.usuario_id && existente.usuario_id !== usuarioId) {
       throw HttpError.conflicto('Ese email ya está asociado a otra cuenta.');
     }
-    const { data } = await db.admin
-      .from('clientes')
-      .update({ usuario_id: usuarioId, telefono: telefonoLimpio ?? undefined })
-      .eq('id', existente.id)
-      .select('id')
-      .single();
-    return data;
+    return db.ejecutar(() =>
+      db.admin
+        .from('clientes')
+        .update({ usuario_id: usuarioId, telefono: telefonoLimpio ?? undefined })
+        .eq('id', existente.id)
+        .select('id')
+        .single()
+    );
   }
 
-  const { data } = await db.admin
-    .from('clientes')
-    .insert({ nombre, email: emailLimpio, telefono: telefonoLimpio, usuario_id: usuarioId })
-    .select('id')
-    .single();
-  return data;
+  return db.ejecutar(() =>
+    db.admin
+      .from('clientes')
+      .insert({ nombre, email: emailLimpio, telefono: telefonoLimpio, usuario_id: usuarioId })
+      .select('id')
+      .single()
+  );
 }
 
 /** Construye la respuesta de sesión que consume el frontend. */

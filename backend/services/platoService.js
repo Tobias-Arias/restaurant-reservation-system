@@ -81,7 +81,7 @@ async function crearPlato({ categoriaId, nombre, descripcion, precio, imagenUrl,
 async function actualizarPlato(id, cuerpo) {
   const platoId = validarId(id, 'id');
 
-  const existente = await db.admin.from('platos').select('id').eq('id', platoId).maybeSingle();
+  const existente = await db.ejecutar(() => db.admin.from('platos').select('id').eq('id', platoId).maybeSingle());
   if (!existente) throw HttpError.noEncontrado('El plato solicitado no existe.');
 
   const datos = {};
@@ -118,7 +118,7 @@ async function actualizarPlato(id, cuerpo) {
 async function eliminarPlato(id) {
   const platoId = validarId(id, 'id');
 
-  const plato = await db.admin.from('platos').select('id, nombre').eq('id', platoId).maybeSingle();
+  const plato = await db.ejecutar(() => db.admin.from('platos').select('id, nombre').eq('id', platoId).maybeSingle());
   if (!plato) throw HttpError.noEncontrado('El plato solicitado no existe.');
 
   const { count } = await db.admin
@@ -175,7 +175,7 @@ async function crearCategoria({ nombre, descripcion }) {
     descripcion: validarTexto(descripcion, 'descripcion', { min: 3, max: 300, esRequerido: false }),
   };
 
-  const repetida = await db.admin.from('categorias').select('id').ilike('nombre', datos.nombre).maybeSingle();
+  const repetida = await db.ejecutar(() => db.admin.from('categorias').select('id').ilike('nombre', datos.nombre).maybeSingle());
   if (repetida) throw HttpError.conflicto('Ya existe una categoría con ese nombre.');
 
   const categoria = await db.ejecutar(() =>
@@ -187,7 +187,7 @@ async function crearCategoria({ nombre, descripcion }) {
 async function actualizarCategoria(id, cuerpo) {
   const categoriaId = validarId(id, 'id');
 
-  const existente = await db.admin.from('categorias').select('id').eq('id', categoriaId).maybeSingle();
+  const existente = await db.ejecutar(() => db.admin.from('categorias').select('id').eq('id', categoriaId).maybeSingle());
   if (!existente) throw HttpError.noEncontrado('La categoría solicitada no existe.');
 
   const datos = {};
@@ -219,7 +219,7 @@ async function actualizarCategoria(id, cuerpo) {
 async function eliminarCategoria(id) {
   const categoriaId = validarId(id, 'id');
 
-  const categoria = await db.admin.from('categorias').select('id, nombre').eq('id', categoriaId).maybeSingle();
+  const categoria = await db.ejecutar(() => db.admin.from('categorias').select('id, nombre').eq('id', categoriaId).maybeSingle());
   if (!categoria) throw HttpError.noEncontrado('La categoría solicitada no existe.');
 
   const { count } = await db.admin
@@ -243,7 +243,7 @@ async function eliminarCategoria(id) {
 // ---------------------------------------------------------------------------
 
 async function afirmarCategoriaExiste(categoriaId) {
-  const existe = await db.admin.from('categorias').select('id').eq('id', categoriaId).maybeSingle();
+  const existe = await db.ejecutar(() => db.admin.from('categorias').select('id').eq('id', categoriaId).maybeSingle());
   if (!existe) throw HttpError.noProcesable('La categoría seleccionada no existe.');
 }
 

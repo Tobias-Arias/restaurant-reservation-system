@@ -40,12 +40,14 @@ const TRANSICIONES = {
   cancelada: [],
 };
 
+// `v_reservas` es una vista: sus columnas YA vienen desnormalizadas
+// (cliente_nombre, mesa_numero, ...). No hay tablas `c` ni `m` a las que
+// joining: escribir "c.nombre AS ..." hace que PostgREST lo interprete como
+// un agregado y falle con PGRST100.
 const SELECT_DETALLE = `
   id, codigo, cliente_id, mesa_id, fecha, hora, personas, estado, observaciones, created_at,
-  c.nombre AS cliente_nombre, c.apellido AS cliente_apellido,
-  c.email AS cliente_email, c.telefono AS cliente_telefono,
-  m.numero AS mesa_numero, m.capacidad AS mesa_capacidad,
-  m.ubicacion AS mesa_ubicacion, m.estado AS mesa_estado
+  cliente_nombre, cliente_apellido, cliente_email, cliente_telefono,
+  mesa_numero, mesa_capacidad, mesa_ubicacion, mesa_estado
 `;
 
 const origen = () => db.admin.from('v_reservas').select(SELECT_DETALLE);
@@ -250,7 +252,13 @@ async function actualizar(id, cuerpo, usuario) {
   const reservaId = validarId(id, 'id');
   const esAdmin = usuario?.rol === ROL_ADMIN;
 
-  const actual = await db.admin.from('reservas').select('*').eq('id', reservaId).maybeSingle();
+  // IMPORTANTE: siempre vía `db.ejecutar()`. Con @supabase/supabase-js v2.117
+  // un `await builder` directo devuelve el envoltorio de la respuesta
+  // ({ data, error, count, status }) en lugar de la fila, y `fila.estado`
+  // daría undefined.
+  const actual = await db.ejecutar(() =>
+    db.admin.from('reservas').select('*').eq('id', reservaId).maybeSingle()
+  );
   if (!actual) throw HttpError.noEncontrado('La reserva solicitada no existe.');
   afirmarAcceso(actual, usuario);
 
@@ -337,7 +345,9 @@ async function completar(id, usuario) {
 async function eliminar(id, usuario) {
   const reservaId = validarId(id, 'id');
 
-  const reserva = await db.admin.from('reservas').select('id, estado').eq('id', reservaId).maybeSingle();
+  const reserva = await db.ejecutar(() =>
+    db.admin.from('reservas').select('id, estado').eq('id', reservaId).maybeSingle()
+  );
   if (!reserva) throw HttpError.noEncontrado('La reserva solicitada no existe.');
   afirmarAcceso(reserva, usuario);
 
@@ -351,7 +361,9 @@ async function eliminar(id, usuario) {
 async function cambiarEstado(id, destino, usuario) {
   const reservaId = validarId(id, 'id');
 
-  const actual = await db.admin.from('reservas').select('*').eq('id', reservaId).maybeSingle();
+  const actual = await db.ejecutar(() =>
+    db.admin.from('reservas').select('*').eq('id', reservaId).maybeSingle()
+  );
   if (!actual) throw HttpError.noEncontrado('La reserva solicitada no existe.');
   afirmarAcceso(actual, usuario);
 
@@ -413,11 +425,9 @@ async function resolverCliente({ usuario, clienteId, nombre, apellido, email, te
   const emailLimpio = validarEmail(email);
   const telefonoLimpio = validarTelefono(telefono, { requerido: true });
 
-  const existente = await db.admin
-    .from('clientes')
-    .select('id')
-    .eq('email', emailLimpio)
-    .maybeSingle();
+  const existente = await db.ejecutar(() =>
+    db.admin.from('clientes').select('id').eq('email', emailLimpio).maybeSingle()
+  );
 
   if (existente) {
     await db.ejecutar(() =>
@@ -446,11 +456,9 @@ async function resolverCliente({ usuario, clienteId, nombre, apellido, email, te
 }
 
 async function obtenerMesaOperativa(mesaId) {
-  const mesa = await db.admin
-    .from('mesas')
-    .select('id, numero, capacidad, estado')
-    .eq('id', mesaId)
-    .maybeSingle();
+  const mesa = await db.ejecutar(() =>
+    db.admin.from('mesas').select('id, numero, capacidad, estado').eq('id', mesaId).maybeSingle()
+  );
 
   if (!mesa) throw HttpError.noProcesable('La mesa seleccionada no existe.');
   if (mesa.estado === 'mantenimiento') {
@@ -460,7 +468,9 @@ async function obtenerMesaOperativa(mesaId) {
 }
 
 async function obtenerClienteOperativo(clienteId) {
-  const cliente = await db.admin.from('clientes').select('id').eq('id', clienteId).maybeSingle();
+  const cliente = await db.ejecutar(() =>
+    db.admin.from('clientes').select('id').eq('id', clienteId).maybeSingle()
+  );
   if (!cliente) throw HttpError.noProcesable('El cliente indicado no existe.');
   return cliente;
 }
