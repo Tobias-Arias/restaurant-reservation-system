@@ -1,0 +1,42 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Instalar dependencias",
+      "detail": "Instala las dependencias del backend y del frontend",
+      "type": "shell",
+      "command": "npm run install:all",
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: iniciar API",
+      "detail": "node --watch server.js en ./backend (puerto 3000)",
+      "type": "shell",
+      "command": "node --watch server.js",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "group": "dev" }
+    },
+    {
+      "label": "Frontend: iniciar Vite",
+      "detail": "vite en ./frontend (puerto 5173)",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "group": "dev" }
+    },
+    {
+      "label": "Dev: iniciar backend y frontend (Ctrl+Shift+B)",
+      "detail": "Levanta la API y el frontend en una sola terminal (npm run dev)",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "group": "build" }
+    }
+  ]
+}

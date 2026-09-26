@@ -1,0 +1,255 @@
+/* ==========================================================================
+   reservas.css
+   Flujo de reserva (asistente de 4 pasos) y página de "Mis reservas".
+   ========================================================================== */
+
+/* --------------------------------------------------------- Cabecera */
+.reservar__cabecera {
+  max-width: 62ch;
+  margin-bottom: 2rem;
+}
+
+.reservar__titulo {
+  font-size: clamp(2rem, 4.2vw, 3rem);
+  margin-bottom: 0.6rem;
+}
+
+.reservar__bajada { color: var(--tinta-tenue); }
+
+/* --------------------------------------------------------- Pasos */
+.reservar__pasos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin-top: 1.5rem;
+}
+
+.reservar__paso {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem 0.45rem 0.45rem;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--tinta-tenue);
+  background: var(--papel-alt);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-full);
+  transition: all var(--transicion);
+}
+
+.reservar__paso-numero {
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--tinta-tenue);
+  background: var(--blanco);
+  border-radius: 50%;
+}
+
+.reservar__paso.is-activo {
+  color: var(--tinta);
+  background: var(--blanco);
+  border-color: var(--brass-tenue);
+}
+
+.reservar__paso.is-activo .reservar__paso-numero {
+  color: var(--blanco);
+  background: var(--brass);
+}
+
+.reservar__paso.is-actual {
+  color: var(--tinta);
+  border-color: var(--brass);
+  box-shadow: 0 0 0 3px var(--brass-tenue);
+}
+
+/* --------------------------------------------------- Selección de hora */
+.reservar__slots {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem;
+  background: var(--papel-alt);
+  border-radius: var(--radio-m);
+}
+
+.reservar__turno-nombre {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tinta-tenue);
+  margin-bottom: 0.5rem;
+}
+
+.reservar__turno-nombre span { font-weight: 500; text-transform: none; letter-spacing: 0; }
+
+.reservar__turno-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.reservar__slot {
+  padding: 0.55rem 1.05rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--tinta);
+  background: var(--blanco);
+  border: 1.5px solid var(--linea-fuerte);
+  border-radius: var(--radio-m);
+  transition: all var(--transicion);
+}
+
+.reservar__slot:hover {
+  border-color: var(--brass);
+  color: var(--brass);
+  transform: translateY(-1px);
+}
+
+.reservar__slot.is-activo {
+  color: var(--blanco);
+  background: var(--tinta);
+  border-color: var(--tinta);
+}
+
+.reservar__slot.is-activo:hover { color: var(--blanco); }
+
+/* ------------------------------------------------- Rejilla de mesas */
+.reservar__ayuda {
+  margin-bottom: 1.15rem;
+  font-size: 0.88rem;
+  color: var(--tinta-tenue);
+}
+
+.reservar__rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 1rem;
+}
+
+.reservar__nota {
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.86rem;
+  color: var(--tinta-suave);
+  background: var(--brass-tenue);
+  border-left: 3px solid var(--brass);
+  border-radius: var(--radio-s);
+}
+
+.reservar__nota strong { color: var(--tinta); }
+
+/* ----------------------------------------------- Columnas del paso 3 */
+.reservar__columnas {
+  display: grid;
+  grid-template-columns: 1.35fr 0.65fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.reservar__resumen { position: sticky; top: 5.5rem; }
+
+.reservar__resumen-datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.85rem;
+}
+
+.reservar__resumen-datos dt {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tinta-tenue);
+  margin-bottom: 0.15rem;
+}
+
+.reservar__resumen-datos dd {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+.reservar__resumen-nota {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--linea-fuerte);
+  font-size: 0.82rem;
+  color: var(--tinta-tenue);
+}
+
+.reservar__estado {
+  text-transform: capitalize;
+  color: var(--oliva) !important;
+}
+
+/* ------------------------------------------------------- Confirmación */
+.reservar__exito {
+  max-width: 46rem;
+  margin-inline: auto;
+}
+
+.reservar__codigo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 1.75rem 1rem;
+  margin: 1.5rem 0;
+  text-align: center;
+  background: var(--papel-alt);
+  border: 2px dashed var(--brass);
+  border-radius: var(--radio-m);
+}
+
+.reservar__codigo p {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--tinta-tenue);
+}
+
+.reservar__codigo strong {
+  font-family: var(--fuente-titulo);
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--brass);
+}
+
+.reservar__codigo span { font-size: 0.82rem; color: var(--tinta-tenue); }
+
+.reservar__exito-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--linea);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .reservar__columnas { grid-template-columns: 1fr; }
+  .reservar__resumen { position: static; order: -1; }
+}
+
+@media (max-width: 640px) {
+  .reservar__pasos { gap: 0.35rem; }
+  .reservar__paso { font-size: 0.76rem; padding-right: 0.65rem; }
+  .reservar__rejilla { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .reservar__exito-acciones .btn { width: 100%; }
+}

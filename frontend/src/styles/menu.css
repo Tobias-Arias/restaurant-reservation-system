@@ -1,0 +1,150 @@
+/* ==========================================================================
+   menu.css
+   Página pública de menú: cabecera, filtros por categoría y rejilla de platos.
+   ========================================================================== */
+
+.menu__cabecera {
+  max-width: 62ch;
+  margin-bottom: 2rem;
+}
+
+.menu__titulo {
+  font-size: clamp(2.1rem, 4.4vw, 3.2rem);
+  margin-bottom: 0.75rem;
+}
+
+.menu__bajada {
+  font-size: 1.02rem;
+  color: var(--tinta-tenue);
+}
+
+/* ------------------------------------------------------------ Filtros */
+.menu__filtros {
+  position: sticky;
+  top: 5.2rem;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+  padding: 1rem 1.15rem;
+  background: rgba(253, 251, 247, 0.94);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-m);
+  box-shadow: var(--sombra-s);
+}
+
+.menu__pestanas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.menu__pestana {
+  padding: 0.5rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--tinta-suave);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radio-full);
+  transition: all var(--transicion);
+}
+
+.menu__pestana:hover {
+  color: var(--tinta);
+  background: var(--papel-alt);
+}
+
+.menu__pestana.is-activa {
+  color: var(--blanco);
+  background: var(--tinta);
+  border-color: var(--tinta);
+}
+
+.menu__buscador {
+  flex: 0 1 16rem;
+  min-width: 12rem;
+}
+
+.menu__buscador .campo__control {
+  background: var(--blanco);
+}
+
+/* --------------------------------------------------------- Secciones */
+.menu__seccion {
+  margin-bottom: 3rem;
+}
+
+.menu__seccion-titulo {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--brass);
+}
+
+.menu__seccion-titulo::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 3rem;
+  height: 2px;
+  background: var(--brass);
+}
+
+.menu__rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+  gap: 1.5rem;
+}
+
+/* --------------------------------------------------------------- CTA */
+.menu__cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 3rem;
+  padding: 2.25rem;
+  border-radius: var(--radio-l);
+  background: linear-gradient(135deg, var(--brass-tenue), var(--papel-alt));
+  border: 1px solid var(--linea);
+}
+
+.menu__cta p {
+  font-family: var(--fuente-titulo);
+  font-size: 1.3rem;
+  color: var(--tinta);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .menu__filtros {
+    position: static;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .menu__buscador { flex: 1 1 auto; }
+  .menu__pestanas { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 0.25rem; }
+  .menu__pestana { white-space: nowrap; }
+}
+
+@media (max-width: 640px) {
+  .menu__rejilla { grid-template-columns: 1fr; }
+  .menu__cta { flex-direction: column; align-items: flex-start; padding: 1.5rem; }
+  .menu__cta .btn { width: 100%; }
+}

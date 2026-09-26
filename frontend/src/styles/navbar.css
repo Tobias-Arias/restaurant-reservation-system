@@ -1,0 +1,226 @@
+/* ==========================================================================
+   navbar.css
+   Barra de navegación pública y barra de sesión del usuario.
+   ========================================================================== */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(253, 251, 247, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--linea);
+}
+
+.navbar__contenedor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  max-width: var(--ancho-max);
+  margin: 0 auto;
+  padding: 0.9rem 1.5rem;
+}
+
+/* ------------------------------------------------------------- Marca */
+.navbar__marca {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  color: var(--tinta);
+  flex-shrink: 0;
+}
+
+.navbar__marca:hover { color: var(--tinta); }
+
+.navbar__logo {
+  font-family: var(--fuente-titulo);
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.navbar__tagline {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--brass);
+}
+
+/* --------------------------------------------------------- Enlaces */
+.navbar__enlaces {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.navbar__enlace {
+  position: relative;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--tinta-suave);
+  border-radius: var(--radio-full);
+  transition: color var(--transicion), background-color var(--transicion);
+}
+
+.navbar__enlace:hover {
+  color: var(--tinta);
+  background: var(--papel-alt);
+}
+
+.navbar__enlace.is-activo {
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.navbar__enlace.is-activo::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 4px;
+  height: 4px;
+  background: var(--brass);
+  border-radius: 50%;
+  transform: translateX(-50%);
+}
+
+.navbar__enlace--admin {
+  color: var(--brass);
+  font-weight: 600;
+}
+
+.navbar__separador {
+  width: 1px;
+  height: 1.5rem;
+  background: var(--linea-fuerte);
+  margin: 0 0.5rem;
+}
+
+/* --------------------------------------------------------- Sesión */
+.navbar__sesion {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 0.35rem;
+}
+
+.navbar__avatar,
+.admin__avatar {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--blanco);
+  background: var(--tinta);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.navbar__usuario {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  margin-right: 0.25rem;
+}
+
+.navbar__usuario-nombre {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+.navbar__usuario-rol {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--brass);
+}
+
+/* ------------------------------------------------------ Hamburguesa */
+.navbar__hamburguesa {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0 0.55rem;
+  background: none;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-s);
+}
+
+.navbar__hamburguesa span {
+  display: block;
+  height: 2px;
+  background: var(--tinta);
+  border-radius: 2px;
+  transition: transform var(--transicion), opacity var(--transicion);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 980px) {
+  .navbar__hamburguesa { display: flex; }
+
+  .navbar__enlaces {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.2rem;
+    padding: 1rem 1.5rem 1.5rem;
+    background: var(--papel);
+    border-bottom: 1px solid var(--linea);
+    box-shadow: var(--sombra-m);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity var(--transicion), transform var(--transicion), visibility var(--transicion);
+  }
+
+  .navbar__enlaces.is-abierto {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  .navbar__enlace {
+    padding: 0.7rem 0.85rem;
+    border-radius: var(--radio-m);
+  }
+
+  .navbar__enlace.is-activo::after { display: none; }
+
+  .navbar__separador {
+    width: 100%;
+    height: 1px;
+    margin: 0.5rem 0;
+  }
+
+  .navbar__sesion {
+    flex-wrap: wrap;
+    margin: 0.5rem 0 0;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--linea);
+  }
+
+  .navbar__usuario { flex: 1; }
+}
+
+@media (max-width: 480px) {
+  .navbar__contenedor { padding: 0.75rem 1rem; }
+  .navbar__logo { font-size: 1.2rem; }
+  .navbar__tagline { font-size: 0.6rem; }
+}
